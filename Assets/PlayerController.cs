@@ -5,7 +5,7 @@ public class PlayerController : MonoBehaviour
 {
     
     float horizontalInput;
-    float moveSpeed = 30.0f;
+    float moveSpeed = 50.0f;
 
     Rigidbody2D rb;
     void Start()
@@ -31,9 +31,22 @@ public class PlayerController : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.gameObject.CompareTag("Object"))
+        if (collision.gameObject.CompareTag("Bomb"))
         {
-            Destroy(this.gameObject);
+            GameManager.instance.ReduceTime(5f);
+            Destroy(collision.gameObject);
+        }
+        else if (collision.gameObject.CompareTag("Gem"))
+        {
+            GameManager.instance.AddScore(10);
+            Destroy(collision.gameObject);
+        }
+        else if (collision.gameObject.CompareTag("Coin"))
+        {
+            GameManager.instance.AddScore(5);
+            Destroy(collision.gameObject);
         }
     }
+
+
 }
