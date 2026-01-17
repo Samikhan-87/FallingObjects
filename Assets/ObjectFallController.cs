@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class ObjectFallController : MonoBehaviour
 {
@@ -24,7 +24,8 @@ public class ObjectFallController : MonoBehaviour
             return;
         }
 
-     
+        ApplyDifficultySettings();
+
         float halfHeight = cam.orthographicSize;
         float halfWidth = halfHeight * cam.aspect;
 
@@ -35,37 +36,59 @@ public class ObjectFallController : MonoBehaviour
         InvokeRepeating(nameof(SpawnObject), 0f, spawnRate);
     }
 
+    void ApplyDifficultySettings()
+    {
+        switch (GameManager.instance.currentDifficulty)
+        {
+            case GameDifficulty.Easy:
+                spawnRate = 1.2f;
+                fallSpeed = 2f;
+                break;
+            case GameDifficulty.Medium:
+                spawnRate = 1.0f;
+                fallSpeed = 2.5f;
+                break;
+            case GameDifficulty.Hard:
+                spawnRate = 0.7f;   // 🔥 faster spawn
+                fallSpeed = 3.2f;   // 🔥 faster fall
+                break;
+        }
+    }
+
     void SpawnObject()
     {
-      
-        int randomIndex = Random.Range(0, fallingPrefabs.Length);
-
+        GameObject prefabToSpawn = fallingPrefabs[Random.Range(0, fallingPrefabs.Length)];
         float randomX = Random.Range(screenLeft, screenRight);
         Vector3 spawnPos = new Vector3(randomX, spawnHeight, 0f);
 
-        GameObject obj = Instantiate(
-            fallingPrefabs[randomIndex],
-            spawnPos,
-            Quaternion.identity
-        );
+        GameObject obj = Instantiate(prefabToSpawn, spawnPos, Quaternion.identity);
 
-        // Add falling behaviour
         SmoothFall fall = obj.AddComponent<SmoothFall>();
         fall.fallSpeed = fallSpeed;
     }
-}
 
-public class SmoothFall : MonoBehaviour
-{
-    [HideInInspector] public float fallSpeed = 2f;
-
-    void Update()
+    public class SmoothFall : MonoBehaviour
     {
-        transform.Translate(Vector3.down * fallSpeed * Time.deltaTime);
+        [HideInInspector] public float fallSpeed = 2f;
 
-        if (transform.position.y < - 12f)
+        void Update()
         {
-            Destroy(gameObject);
+            transform.Translate(Vector3.down * fallSpeed * Time.deltaTime);
+
+            // Destroy if goes below screen
+            if (transform.position.y < -12f)
+            {
+                Destroy(gameObject);
+            }
+        }
+
+        // ✅ Use OnCollisionEnter2D for ground collision
+        void OnCollisionEnter2D(Collision2D collision)
+        {
+            if (collision.gameObject.CompareTag("Platform"))
+            {
+                Destroy(gameObject);
+            }
         }
     }
 }

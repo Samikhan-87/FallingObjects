@@ -7,6 +7,8 @@ TagManager:
   - Gem
   - Bomb
   - Coin
+  - Blade
+  - Platform
   layers:
   - Default
   - TransparentFX
